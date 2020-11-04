@@ -64,5 +64,82 @@ namespace TSQL.UC3.Demo
                 connection.Close();
             }
         }
+         public void InsertIntoTwoTables()
+        {
+            using (connection)
+            {
+                connection.Open();
+
+                // Enlist a command in the current transaction.
+                SqlCommand command = connection.CreateCommand();
+
+                try
+                {
+                    // Execute two separate commands.
+                    command.CommandText =
+                      "insert into Employee(EmployeeName,JobDiscription) values('ZZZZ','Test')";
+                    command.ExecuteScalar();
+                    Console.WriteLine("Inserted into Employee table successfully.");
+                    command.CommandText =
+                      "insert into Salary(EmployeeSalary,Month1,EmployeeId) values(1234,'June',1)";
+                    command.ExecuteNonQuery();
+
+                    Console.WriteLine("Inserted into Salary table successfully.");
+                }
+                catch (Exception ex)
+                {
+                    // Handle the exception if the transaction fails to commit.
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        public void InsertIntoTwoTablesWithTransactions()
+        {
+            using (connection)
+            {
+                connection.Open();
+
+                // Start a local transaction.
+                SqlTransaction sqlTran = connection.BeginTransaction();
+
+                // Enlist a command in the current transaction.
+                SqlCommand command = connection.CreateCommand();
+                command.Transaction = sqlTran;
+
+                try
+                {                    
+                    // Execute two separate commands.
+                    command.CommandText =
+                      "insert into Employee(EmployeeName,JobDiscription) values('TesingRollBack','Test')";
+                    command.ExecuteScalar();
+                    command.CommandText =
+                      "insert into Salary(EmployeeSalary,Month1,EmployeeId) values(1234,'July',1)";
+                    command.ExecuteNonQuery();
+
+                    // Commit the transaction.
+                    sqlTran.Commit();
+                    Console.WriteLine("Both records were written to database.");
+                }
+                catch (Exception ex)
+                {
+                    // Handle the exception if the transaction fails to commit.
+                    Console.WriteLine(ex.Message);
+
+                    try
+                    {
+                        // Attempt to roll back the transaction.
+                        sqlTran.Rollback();
+                    }
+                    catch (Exception exRollback)
+                    {
+                        // Throws an InvalidOperationException if the connection
+                        // is closed or the transaction has already been rolled
+                        // back on the server.
+                        Console.WriteLine(exRollback.Message);
+                    }
+                }
+            }
+        }
     }
 }
