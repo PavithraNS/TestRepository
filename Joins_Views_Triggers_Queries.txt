@@ -1,0 +1,70 @@
+------------------------------------------------------------------------
+--Inner join
+select e.EmployeeId,e.EmployeeName,e.JobDiscription,s.EmployeeSalary,s.Month,s.EmployeeId from Employee e inner join Salary s on e.EmployeeId=s.EmployeeId;
+--left join
+select * from Employee;
+select * from Salary;
+select e.EmployeeId,e.EmployeeName,e.JobDiscription,s.EmployeeSalary,s.Month,s.EmployeeId from Employee e left join Salary s on e.EmployeeId=s.EmployeeId;
+--right join
+select * from Employee;
+select * from Salary;
+select e.EmployeeId,e.EmployeeName,e.JobDiscription,s.EmployeeSalary,s.Month,s.EmployeeId from Employee e right join Salary s on e.EmployeeId=s.EmployeeId;
+---full join
+select * from Employee;
+select * from Salary;
+select e.EmployeeId,e.EmployeeName,e.JobDiscription,s.EmployeeSalary,s.Month,s.EmployeeId from Employee e full join Salary s on e.EmployeeId=s.EmployeeId;
+
+------Sub Query----
+select * from Salary;
+select EmployeeId,EmployeeSalary from Salary where EmployeeSalary=(Select Max(EmployeeSalary) As Max from Salary) 
+
+-------------Function creation----
+
+alter function totalEmployeeSalary(@month varchar(30))
+RETURNS int 
+AS
+  
+BEGIN 
+Declare @returnValue int;
+   SELECT @returnValue=sum(e.EmployeeSalary) from Salary e where e.Month=@month;
+   if(@returnValue is null)
+    set @returnValue=0
+   RETURN @returnValue; 
+END; 
+-------------------------------
+select count(*) from Employee
+SELECT [dbo].[totalEmployeeSalary]('Dec') as Total
+ 
+
+----------Views-------
+create view EmpSalaryInfo
+AS
+  select e.EmployeeName,e.JobDiscription,s.EmployeeSalary,s.Month 
+  from Employee e 
+  inner join Salary s 
+  on e.EmployeeId=s.EmployeeId;
+  -----Views will not allow duplicates fields-----
+  SELECT * FROM EmpSalaryInfo;
+
+  -------------------------Triggers----------------------
+  ---triggers will create at the level of tables
+  create trigger DisplayEmpCount
+  on employee
+  After insert
+  As
+  begin
+  select count(*) as EmpCount from Employee;
+  End;
+
+  insert into Employee(EmployeeName,JobDiscription) values('Keerti','Celebraty');
+
+  ----------------------------------------------------------------
+
+
+
+
+
+
+
+
+		
